@@ -1,35 +1,89 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from 'react';
+import ChatHistory from './components/ChatHistory';
+import ChatView from './components/ChatView';
+import Navbar from './components/Navbar';
+import ApiKeyModal from './components/ApiKeyModal';
+import { useChatStore } from './store/chatStore';
+import apiService from './services/api';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [apiConfigured, setApiConfigured] = useState(false);
+  const createNewChat = useChatStore(state => state.createNewChat);
+
+  // Check for saved API credentials
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('metisai_api_key');
+    const savedBotId = localStorage.getItem('metisai_bot_id');
+    
+    if (savedApiKey && savedBotId) {
+      apiService.updateConfig({
+        apiKey: savedApiKey,
+        botId: savedBotId
+      });
+      setApiConfigured(true);
+    } else {
+      // Show settings modal if API is not configured
+      setShowSettingsModal(true);
+    }
+  }, []);
+
+  const handleNewChat = async () => {
+    try {
+      if (!apiConfigured) {
+        setShowSettingsModal(true);
+        return;
+      }
+      await createNewChat('Hello');
+    } catch (error) {
+      console.error('Failed to create new chat:', error);
+    }
+  };
+
+  const handleCloseSettingsModal = () => {
+    setShowSettingsModal(false);
+    setApiConfigured(true);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="flex flex-col h-screen bg-gray-50">
+      <Navbar 
+        onToggleSidebar={() => setShowSidebar(!showSidebar)} 
+        onOpenSettings={() => setShowSettingsModal(true)}
+      />
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar - hidden on mobile unless toggled */}
+        <div className={`
+          ${showSidebar ? 'translate-x-0' : '-translate-x-full'} 
+          md:translate-x-0 transition-transform duration-300 ease-in-out
+          w-full md:w-80 lg:w-96 absolute md:relative z-10 md:z-0 h-[calc(100vh-3.5rem)]
+        `}>
+          <ChatHistory onNewChat={handleNewChat} />
+        </div>
+        
+        {/* Overlay for mobile */}
+        {showSidebar && (
+          <div 
+            className="md:hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-0"
+            onClick={() => setShowSidebar(false)}
+          />
+        )}
+        
+        {/* Main chat area */}
+        <div className="flex-1 min-w-0">
+          <ChatView onNewChat={handleNewChat} />
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+      
+      {/* API Key Modal */}
+      <ApiKeyModal 
+        isOpen={showSettingsModal} 
+        onClose={handleCloseSettingsModal} 
+      />
+    </div>
+  );
 }
 
-export default App
+export default App;
