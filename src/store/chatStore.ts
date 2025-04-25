@@ -1,6 +1,24 @@
 import { create } from 'zustand';
-import { ChatSession, ChatSessionApiResponse, Message, MessageResponse } from '../types';
+import { ChatSession, ChatSessionApiResponse, Message } from '../types';
 import apiService from '../services/api';
+
+// Helper to map API messages to app Message type
+const mapApiMessages = (apiMessages: any[]): Message[] =>
+  apiMessages
+    .slice() // avoid mutating original
+    .reverse()
+    .map((m) => ({
+      id: m.id,
+      type: m.type,
+      content: m.content,
+      timestamp: m.timestamp,
+      attachments: m.attachments,
+      finishReason: m.finishReason,
+      citations: m.citations,
+      toolCalls: m.toolCalls,
+      rag: m.rag,
+      billing: m.billing,
+    }));
 
 interface ChatState {
   sessions: ChatSession[];
@@ -25,7 +43,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   error: null,
   messages: {},
   
-  fetchSessions: async () => {
+  fetchSessions: async (): Promise<void> => {
     set({ isLoading: true, error: null });
     try {
       const sessions = await apiService.getChatSessions();
@@ -33,17 +51,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       
       // Initialize messages from fetched sessions
       const messagesMap: Record<string, Message[]> = {};
-      sessions.forEach(session => {
-        messagesMap[session.id] = session.messages.map(m => ({
-          id: m.id,
-          type: m.message.type,
-          content: m.message.content,
-          timestamp: m.timestamp,
-          attachments: m.message.attachments
-        }));
+      sessions.forEach((session) => {
+        messagesMap[session.id] = mapApiMessages(session.messages || []);
       });
       
-      set(state => ({ 
+      set((state) => ({ 
         messages: { ...state.messages, ...messagesMap }
       }));
       
@@ -56,26 +68,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
         error: error instanceof Error ? error.message : 'Failed to fetch chat sessions', 
         isLoading: false 
       });
+      console.error(error);
     }
   },
 
-  fetchSessionById: async (sessionId: string) => {
+  fetchSessionById: async (sessionId: string): Promise<void> => {
     set({ isLoading: true, error: null });
     try {
       const session: ChatSessionApiResponse = await apiService.getChatSessionById(sessionId);
-      set(state => ({
+      set((state) => ({
         messages: {
           ...state.messages,
-          [sessionId]: (session.messages || [])
-            .slice() // make a shallow copy to avoid mutating original
-            .reverse()
-            .map(m => ({
-              id: m.id,
-              type: m.type,
-              content: m.content,
-              timestamp: m.timestamp,
-              attachments: m.attachments
-            }))
+          [sessionId]: mapApiMessages(session.messages || [])
         },
         isLoading: false
       }));
@@ -84,21 +88,22 @@ export const useChatStore = create<ChatState>((set, get) => ({
         error: error instanceof Error ? error.message : 'Failed to fetch chat session', 
         isLoading: false 
       });
+      console.error(error);
     }
   },
   
-  createNewChat: async () => {
+  createNewChat: async (): Promise<string> => {
     // Create a local temporary session, do not call API
     const tempId = `temp-${Date.now()}`;
     const botId = apiService.getBotId();
-    const tempSession = {
+    const tempSession: ChatSession = {
       id: tempId,
       botId,
       user: null,
       messages: [],
       startDate: Date.now(),
     };
-    set(state => ({
+    set((state) => ({
       sessions: [tempSession, ...state.sessions],
       currentSessionId: tempId,
       messages: {
@@ -111,7 +116,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     return tempId;
   },
   
-  sendMessage: async (content: string) => {
+  sendMessage: async (content: string): Promise<void> => {
     const { currentSessionId } = get();
     if (!currentSessionId) {
       set({ error: 'No active chat session' });
@@ -126,7 +131,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       timestamp: new Date().toISOString()
     };
     
-    set(state => ({
+    set((state) => ({
       messages: {
         ...state.messages,
         [currentSessionId]: [
@@ -143,7 +148,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       try {
         // Create session and send first message in one API call
         const session = await apiService.createChatSession(content);
-        set(state => {
+        set((state) => {
           // Remove temp session and replace with real session
           const newSessions = [session, ...state.sessions.filter(s => s.id !== currentSessionId)];
           return {
@@ -153,13 +158,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             messages: {
               ...state.messages,
               // Remove temp messages, add real messages (may be empty)
-              [session.id]: (session.messages || []).map(m => ({
-                id: m.id,
-                type: m.message.type,
-                content: m.message.content,
-                timestamp: m.timestamp,
-                attachments: m.message.attachments
-              }))
+              [session.id]: mapApiMessages(session.messages || [])
             }
           };
         });
@@ -168,6 +167,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           error: error instanceof Error ? error.message : 'Failed to create new chat', 
           isLoading: false 
         });
+        console.error(error);
       }
       return;
     }
@@ -177,7 +177,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const response = await apiService.sendMessage(currentSessionId, content);
       
       // Add AI response to messages
-      set(state => ({
+      set((state) => ({
         messages: {
           ...state.messages,
           [currentSessionId]: [
@@ -192,14 +192,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
         error: error instanceof Error ? error.message : 'Failed to send message', 
         isLoading: false 
       });
+      console.error(error);
     }
   },
   
-  setCurrentSession: (sessionId: string) => {
+  setCurrentSession: (sessionId: string): void => {
     set({ currentSessionId: sessionId });
   },
   
-  resetError: () => {
+  resetError: (): void => {
     set({ error: null });
   }
 }));
