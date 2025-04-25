@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { MessageSquare, Loader } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
@@ -17,7 +17,10 @@ const ChatView: React.FC<ChatViewProps> = ({ onNewChat }) => {
   } = useChatStore();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const currentMessages = currentSessionId ? messages[currentSessionId] || [] : [];
+  const currentMessages = useMemo(
+    () => (currentSessionId ? messages[currentSessionId] || [] : []),
+    [currentSessionId, messages]
+  );
 
   // Scroll to bottom whenever messages change
   useEffect(() => {

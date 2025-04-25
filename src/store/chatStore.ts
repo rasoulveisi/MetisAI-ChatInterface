@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ChatSession, Message } from '../types';
+import { ChatSession, ChatSessionApiResponse, Message, MessageResponse } from '../types';
 import apiService from '../services/api';
 
 interface ChatState {
@@ -11,7 +11,8 @@ interface ChatState {
   
   // Actions
   fetchSessions: () => Promise<void>;
-  createNewChat: (initialMessage: string) => Promise<string>;
+  fetchSessionById: (sessionId: string) => Promise<void>;
+  createNewChat: () => Promise<string>;
   sendMessage: (content: string) => Promise<void>;
   setCurrentSession: (sessionId: string) => void;
   resetError: () => void;
@@ -57,34 +58,57 @@ export const useChatStore = create<ChatState>((set, get) => ({
       });
     }
   },
-  
-  createNewChat: async (initialMessage: string) => {
+
+  fetchSessionById: async (sessionId: string) => {
     set({ isLoading: true, error: null });
     try {
-      const session = await apiService.createChatSession(initialMessage);
+      const session: ChatSessionApiResponse = await apiService.getChatSessionById(sessionId);
       set(state => ({
-        sessions: [session, ...state.sessions],
-        currentSessionId: session.id,
-        isLoading: false,
         messages: {
           ...state.messages,
-          [session.id]: session.messages.map(m => ({
-            id: m.id,
-            type: m.message.type,
-            content: m.message.content,
-            timestamp: m.timestamp,
-            attachments: m.message.attachments
-          }))
-        }
+          [sessionId]: (session.messages || [])
+            .slice() // make a shallow copy to avoid mutating original
+            .reverse()
+            .map(m => ({
+              id: m.id,
+              type: m.type,
+              content: m.content,
+              timestamp: m.timestamp,
+              attachments: m.attachments
+            }))
+        },
+        isLoading: false
       }));
-      return session.id;
     } catch (error) {
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to create new chat', 
+        error: error instanceof Error ? error.message : 'Failed to fetch chat session', 
         isLoading: false 
       });
-      throw error;
     }
+  },
+  
+  createNewChat: async () => {
+    // Create a local temporary session, do not call API
+    const tempId = `temp-${Date.now()}`;
+    const botId = apiService.getBotId();
+    const tempSession = {
+      id: tempId,
+      botId,
+      user: null,
+      messages: [],
+      startDate: Date.now(),
+    };
+    set(state => ({
+      sessions: [tempSession, ...state.sessions],
+      currentSessionId: tempId,
+      messages: {
+        ...state.messages,
+        [tempId]: []
+      },
+      isLoading: false,
+      error: null
+    }));
+    return tempId;
   },
   
   sendMessage: async (content: string) => {
@@ -113,6 +137,40 @@ export const useChatStore = create<ChatState>((set, get) => ({
       isLoading: true,
       error: null
     }));
+    
+    // Check if this is a temporary session
+    if (currentSessionId.startsWith('temp-')) {
+      try {
+        // Create session and send first message in one API call
+        const session = await apiService.createChatSession(content);
+        set(state => {
+          // Remove temp session and replace with real session
+          const newSessions = [session, ...state.sessions.filter(s => s.id !== currentSessionId)];
+          return {
+            sessions: newSessions,
+            currentSessionId: session.id,
+            isLoading: false,
+            messages: {
+              ...state.messages,
+              // Remove temp messages, add real messages (may be empty)
+              [session.id]: (session.messages || []).map(m => ({
+                id: m.id,
+                type: m.message.type,
+                content: m.message.content,
+                timestamp: m.timestamp,
+                attachments: m.message.attachments
+              }))
+            }
+          };
+        });
+      } catch (error) {
+        set({ 
+          error: error instanceof Error ? error.message : 'Failed to create new chat', 
+          isLoading: false 
+        });
+      }
+      return;
+    }
     
     try {
       // Send message to API

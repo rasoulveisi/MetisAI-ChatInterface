@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ApiConfig, ChatSession, Message } from '../types';
+import { ApiConfig, ChatSession, ChatSessionApiResponse, Message, MessageResponse } from '../types';
 
 const DEFAULT_API_CONFIG: ApiConfig = {
   apiKey: 'YOUR_API_KEY_HERE',
@@ -84,9 +84,27 @@ class ApiService {
     }
   }
 
+  async getChatSessionById(sessionId: string): Promise<ChatSessionApiResponse> {
+    try {
+      const response = await axios.get(
+        `${this.config.baseUrl}/chat/session/${sessionId}`,
+        { headers: this.getHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error getting chat sessions:', error);
+      throw error;
+    }
+  }
+
+
   // Update API configuration
   updateConfig(config: Partial<ApiConfig>) {
     this.config = { ...this.config, ...config };
+  }
+
+  public getBotId() {
+    return this.config.botId;
   }
 }
 

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, PlusCircle, RefreshCw } from 'lucide-react';
 import { useChatStore } from '../store/chatStore';
+import { MessageResponse } from '../types';
 
 interface ChatHistoryProps {
   onNewChat: () => void;
@@ -12,15 +13,21 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onNewChat }) => {
     sessions, 
     currentSessionId, 
     isLoading,
-    fetchSessions, 
-    setCurrentSession 
+    fetchSessionById, 
+    setCurrentSession,
+    fetchSessions,
   } = useChatStore();
-
   useEffect(() => {
     fetchSessions();
   }, [fetchSessions]);
+  // Fetch sessions on currentSessionId change, but skip if temp-
+  useEffect(() => {
+    if (!currentSessionId) return;
+    if (currentSessionId.startsWith('temp-')) return;
+    fetchSessionById(currentSessionId);
+  }, [currentSessionId, fetchSessionById]);
 
-  const getFirstMessage = (messages: any[]) => {
+  const getFirstMessage = (messages: MessageResponse[]) => {
     if (!messages || messages.length === 0) return 'New conversation';
     return messages[0]?.message?.content || 'New conversation';
   };

@@ -41,3 +41,32 @@ export interface ApiConfig {
   botId: string;
   baseUrl: string;
 }
+
+export interface ChatSessionApiResponse {
+  botId: string;
+  headline: string | null;
+  id: string;
+  messages: ChatMessageApiResponse[];
+  startDate: number;
+  user: User | null;
+}
+
+export interface ChatMessageApiResponse {
+  id: string;
+  type: 'USER' | 'AI';
+  content: string;
+  attachments: any[] | null;
+  timestamp: number | string;
+  finishReason?: string;
+  citations?: any[] | null;
+  toolCalls?: any[] | null;
+  rag?: any | null;
+  billing?: {
+    cost: number;
+  } | null;
+}
+
+export interface User {
+  id?: string;
+  name?: string;
+}
