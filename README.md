@@ -1,54 +1,96 @@
-# React + TypeScript + Vite
+# MetisAI Chatbot Webapp
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MetisAI is a professional chatbot interface designed to seamlessly connect with the Metis AI platform. By simply providing your API key and bot ID, you can instantly interact with your custom AI bot through a modern, user-friendly web interface. MetisAI empowers developers and businesses to deploy, manage, and share their AI-powered chatbots as standalone web applications, making it easy to showcase and distribute intelligent conversational agents to end users or clients.
 
-Currently, two official plugins are available:
+Whether you're building advanced support bots, virtual assistants, or custom AI solutions, MetisAI streamlines the integration and sharing process—no complex setup required. Share your developed AI bot with a unique website link, and deliver a polished, branded experience to your audience.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- ⚡️ Fast development with Vite
+- 🎨 Utility-first styling with Tailwind CSS v4
+- ⚛️ Latest React 19 features
+- 📦 State management with Zustand
+- 📅 Date utilities with date-fns
+- ✨ Custom color palette and animation via Tailwind config
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Prerequisites
+
+- **Node.js** v20 or higher (recommended for compatibility with Tailwind v4 and Lightning CSS)
+- **npm** v9 or higher
+
+### Installation
+
+1. **Clone the repository:**
+   ```sh
+   git clone <your-repo-url>
+   cd ai-chat-bot-react
+   ```
+
+2. **Install dependencies:**
+   ```sh
+   npm install
+   ```
+
+### Development
+
+Start the development server:
+```sh
+npm run dev
+```
+The app will be available at [http://localhost:5173](http://localhost:5173) (or as indicated in your terminal).
+
+### Building for Production
+
+```sh
+npm run build
+```
+The output will be in the `dist` folder.
+
+### Preview Production Build
+
+```sh
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
 ```
+src/
+  assets/         # Static assets
+  components/     # React components
+  services/       # API and data services
+  store/          # Zustand stores
+  types/          # TypeScript types
+  App.tsx         # Main app component
+  main.tsx        # Entry point
+  index.css       # Tailwind CSS imports and custom styles
+```
+
+## Tailwind CSS Setup
+
+- **Config:** See [`tailwind.config.js`](./tailwind.config.js) for custom colors and animations.
+- **Usage:** Tailwind is imported in [`src/index.css`](./src/index.css) with:
+  ```css
+  @import "tailwindcss";
+  @config "../tailwind.config.js";
+  ```
+
+## Vite Configuration
+
+- See [`vite.config.ts`](./vite.config.ts) for Vite and React plugin setup.
+
+## Deployment Notes
+
+- Ensure your deployment environment uses **Node.js v20+** for compatibility with Tailwind v4 and Lightning CSS ([Tailwind CSS compatibility docs](https://tailwindcss.com/docs/compatibility)).
+- If deploying to Netlify, set the Node version in your environment variables or `package.json`:
+  ```json
+  "engines": {
+    "node": ">=20.0.0"
+  }
+  ```
+
+## License
+
+MIT
