@@ -84,12 +84,7 @@ src/
 ## Deployment Notes
 
 - Ensure your deployment environment uses **Node.js v20+** for compatibility with Tailwind v4 and Lightning CSS ([Tailwind CSS compatibility docs](https://tailwindcss.com/docs/compatibility)).
-- If deploying to Netlify, set the Node version in your environment variables or `package.json`:
-  ```json
-  "engines": {
-    "node": ">=20.0.0"
-  }
-  ```
+- **If deploying to Netlify, you must explicitly select Node 20 in your Netlify site settings (Site settings → Build & deploy → Environment → Node version).** Setting the Node version in environment variables or `package.json` alone is not sufficient.
 
 ## License
 
