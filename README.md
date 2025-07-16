@@ -1,17 +1,21 @@
-# MetisAI Chatbot Webapp
+# MetisAI ChatInterface
 
-MetisAI is a professional chatbot interface designed to seamlessly connect with the Metis AI platform. By simply providing your API key and bot ID, you can instantly interact with your custom AI bot through a modern, user-friendly web interface. MetisAI empowers developers and businesses to deploy, manage, and share their AI-powered chatbots as standalone web applications, making it easy to showcase and distribute intelligent conversational agents to end users or clients.
+MetisAI ChatInterface is a professional chatbot web application designed to seamlessly connect with the Metis AI platform. By simply providing your API key and bot ID, you can instantly interact with your custom AI bot through a modern, user-friendly web interface. This application empowers developers and businesses to deploy, manage, and share their AI-powered chatbots as standalone web applications, making it easy to showcase and distribute intelligent conversational agents to end users or clients.
 
-Whether you're building advanced support bots, virtual assistants, or custom AI solutions, MetisAI streamlines the integration and sharing process—no complex setup required. Share your developed AI bot with a unique website link, and deliver a polished, branded experience to your audience.
+Whether you're building advanced support bots, virtual assistants, or custom AI solutions, MetisAI ChatInterface streamlines the integration and sharing process—no complex setup required. Share your developed AI bot with a unique website link, and deliver a polished, branded experience to your audience.
 
-## Features
+## 🚀 Features
 
-- ⚡️ Fast development with Vite
-- 🎨 Utility-first styling with Tailwind CSS v4
-- ⚛️ Latest React 19 features
-- 📦 State management with Zustand
-- 📅 Date utilities with date-fns
-- ✨ Custom color palette and animation via Tailwind config
+- ⚡️ **Modern React 19** - Built with the latest React features and performance optimizations
+- 🎨 **Tailwind CSS v4** - Utility-first styling with Lightning CSS for optimal performance
+- 📦 **Zustand State Management** - Lightweight and efficient state management solution
+- 🔄 **Real-time Chat Interface** - Seamless messaging experience with optimistic updates
+- 🌐 **API Integration** - Easy integration with Metis AI platform via REST APIs
+- 📱 **Responsive Design** - Perfect experience across desktop, tablet, and mobile devices
+- 🔧 **TypeScript** - Full type safety and enhanced developer experience
+- ⚡️ **Vite Build System** - Lightning-fast development and build process
+- 📅 **Date Utilities** - Enhanced date handling with date-fns integration
+- 🎭 **Custom Animations** - Smooth transitions and micro-interactions
 
 ## Getting Started
 
@@ -25,7 +29,7 @@ Whether you're building advanced support bots, virtual assistants, or custom AI 
 1. **Clone the repository:**
    ```sh
    git clone <your-repo-url>
-   cd ai-chat-bot-react
+   cd MetisAI-ChatInterface
    ```
 
 2. **Install dependencies:**
